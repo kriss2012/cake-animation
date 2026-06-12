@@ -1,0 +1,96 @@
+.fuego {
+  border-radius: 100%;
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  margin-left: -2.6px;
+  width: 6.6px;
+  height: 18px;
+}
+
+.fuego.idle {
+  animation: fuegoIdle 2s infinite;
+}
+.fuego.flicker {
+  animation: fuegoBlow 0.3s infinite;
+}
+
+@keyframes fuegoIdle {
+  0%, 100% {
+    background: rgba(254, 248, 97, 0.5);
+    box-shadow: 0 0 20px 6px rgba(248, 233, 209, 0.1);
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    background: rgba(255, 150, 0, 0.2);
+    transform: translateY(-5px) scale(0.9);
+  }
+}
+
+@keyframes fuegoBlow {
+  0%, 100% {
+    background: rgba(254, 248, 97, 0.6);
+    box-shadow: 0 0 30px 8px rgba(248, 233, 209, 0.4);
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    background: rgba(255, 80, 0, 0.2);
+    transform: translateY(-15px) scale(0.5);
+  }
+}
+
+.smoke {
+  width: 10px;
+  height: 50px;
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  margin-left: -5px;
+  background: radial-gradient(rgba(255, 255, 255, 0.3), transparent);
+  animation: smokeRise 2s ease-out forwards;
+}
+
+@keyframes smokeRise {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50px) scale(1.5);
+  }
+}
+/* Sparkle Effect */
+.smoke {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  margin-left: -15px;
+  background: radial-gradient(ellipse at center, rgba(200, 200, 200, 0.5), transparent);
+  animation: smokeRise 2.5s ease-in-out infinite;
+  opacity: 0.6;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes smokeRise {
+  0% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-10px) scale(1.2);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-20px) scale(1.4);
+    opacity: 0;
+  }
+}
+.cake{
+    position: absolute;
+    top: 266px;
+}
