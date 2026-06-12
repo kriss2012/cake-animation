@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import CakeModel from './CakeModel';
@@ -45,15 +45,17 @@ export default function CakeScene({
           color="#3b1d60"
         />
 
-        <CakeModel
-          flavor={flavor}
-          candles={candles}
-          candleStates={candleStates}
-          onCandleClick={onCandleClick}
-          showSprinkles={showSprinkles}
-          showCherries={showCherries}
-          recipientName={recipientName}
-        />
+        <Suspense fallback={null}>
+          <CakeModel
+            flavor={flavor}
+            candles={candles}
+            candleStates={candleStates}
+            onCandleClick={onCandleClick}
+            showSprinkles={showSprinkles}
+            showCherries={showCherries}
+            recipientName={recipientName}
+          />
+        </Suspense>
 
         {interactive && (
           <OrbitControls 
