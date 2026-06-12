@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { 
   Volume2, VolumeX, Mic, MicOff, Settings, X, 
-  HelpCircle, Sparkles, Play, Pause, RefreshCw 
+  Sparkles, RefreshCw 
 } from 'lucide-react';
 import { birthdayAudio } from './utils/audio';
 import WelcomeScreen from './components/WelcomeScreen';
@@ -63,7 +63,6 @@ function App() {
   // Unified microphone analysis loop
   useEffect(() => {
     if (step !== 'celebrate' || !micEnabled || isAllBlown) {
-      // Cleanup microphone if disabled
       cleanupMic();
       return;
     }
@@ -75,7 +74,6 @@ function App() {
 
     const startMic = async () => {
       try {
-        // Use the controller's AudioContext
         birthdayAudio.init();
         audioContext = birthdayAudio.ctx;
         
@@ -115,29 +113,27 @@ function App() {
           const delta = (now - lastFrameTimeRef.current) / 1000;
           lastFrameTimeRef.current = now;
 
-          if (currentVol > 30) {
+          if (currentVol > 35) {
             setIsBlowing(true);
             blowDurationRef.current += delta;
 
             // Progressive blowout: blow out candles based on duration
-            // e.g., blow out a candle every 0.25 seconds of active blowing
-            if (blowDurationRef.current > 0.25) {
+            // e.g., blow out a candle every 0.20 seconds of active blowing
+            if (blowDurationRef.current > 0.20) {
               setCandleStates((prev) => {
-                // Find first lit candle and blow it out
                 const nextStates = [...prev];
                 const litIndex = nextStates.findIndex(lit => lit === true);
                 if (litIndex !== -1) {
                   nextStates[litIndex] = false;
-                  // Play a dynamic blow-out chime or sound
                   birthdayAudio.playBlowWind();
-                  blowDurationRef.current = 0; // Reset timer for next candle
+                  blowDurationRef.current = 0;
                 }
                 return nextStates;
               });
             }
           } else {
             setIsBlowing(false);
-            blowDurationRef.current = Math.max(0, blowDurationRef.current - delta * 2); // decay blow charge
+            blowDurationRef.current = Math.max(0, blowDurationRef.current - delta * 2);
           }
 
           animationFrameIdRef.current = requestAnimationFrame(checkVolumeLoop);
@@ -194,7 +190,7 @@ function App() {
     // Continuous confetti loop
     const duration = 5 * 1000;
     const animationEnd = Date.now() + duration;
-    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
+    const defaults = { startVelocity: 35, spread: 360, ticks: 60, zIndex: 1000 };
 
     const randomInRange = (min, max) => Math.random() * (max - min) + min;
 
@@ -206,9 +202,8 @@ function App() {
       }
 
       const particleCount = 50 * (timeLeft / duration);
-      // Confetti from both sides
-      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
-      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.15, 0.35), y: Math.random() - 0.2 } });
+      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.65, 0.85), y: Math.random() - 0.2 } });
     }, 250);
   };
 
@@ -218,7 +213,6 @@ function App() {
     setCandleCount(age);
     setStep('celebrate');
     
-    // Initialize & Play audio
     birthdayAudio.init();
     birthdayAudio.playMagicSweep();
     
@@ -237,7 +231,6 @@ function App() {
       const nextState = !nextStates[index];
       nextStates[index] = nextState;
       
-      // Play a short synth chime feedback when lighting/extinguishing
       if (nextState) {
         birthdayAudio.playChime(440, birthdayAudio.ctx.currentTime, 0.3);
       } else {
@@ -260,12 +253,12 @@ function App() {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col items-center justify-between overflow-hidden">
-      {/* Sparkly / starry background stars */}
+    <div className="app-main-wrapper">
+      {/* Sparkly background stars */}
       <div className="stardust-bg" />
 
       {/* Floating balloons background */}
-      <Balloons active={step === 'celebrate'} count={5} />
+      <Balloons active={step === 'celebrate'} count={6} />
 
       {/* Welcome Screen Cover */}
       {step === 'welcome' && (
@@ -276,13 +269,21 @@ function App() {
       {step === 'celebrate' && (
         <>
           {/* Header controls */}
-          <header className="w-full max-w-5xl px-6 py-4 flex items-center justify-between z-40 relative">
+          <header className="app-header">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-2"
+              className="flex-row flex-center"
+              style={{ gap: '8px' }}
             >
-              <h1 className="text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-pink-500" style={{ fontFamily: 'var(--font-cursive)' }}>
+              <h1 style={{ 
+                fontSize: '1.6rem', 
+                fontWeight: 800, 
+                fontFamily: 'var(--font-cursive)',
+                background: 'linear-gradient(135deg, #fbbf24, #f472b6)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}>
                 Happy Birthday! 🎈
               </h1>
             </motion.div>
@@ -291,7 +292,8 @@ function App() {
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-3"
+              className="flex-row flex-center"
+              style={{ gap: '12px' }}
             >
               <AudioVisualizer 
                 volume={volume} 
@@ -301,7 +303,7 @@ function App() {
 
               <button
                 onClick={() => setMusicPlaying(!musicPlaying)}
-                className="p-2.5 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:text-white transition"
+                className="btn-icon"
                 title={musicPlaying ? "Mute Music" : "Play Music"}
               >
                 {musicPlaying ? <Volume2 size={18} /> : <VolumeX size={18} />}
@@ -309,7 +311,7 @@ function App() {
 
               <button
                 onClick={() => setSettingsOpen(true)}
-                className="p-2.5 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:text-white transition"
+                className="btn-icon"
                 title="Customize Cake"
               >
                 <Settings size={18} />
@@ -318,19 +320,28 @@ function App() {
           </header>
 
           {/* Central Birthday Cake Stage */}
-          <main className="flex-1 flex flex-col items-center justify-center w-full max-w-lg px-6 z-30">
+          <main className="main-stage">
             
-            {/* Title / Name Banner */}
-            <div className="text-center mb-10 select-none">
+            {/* Title Banner */}
+            <div className="title-banner">
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: 'spring', damping: 10 }}
+                transition={{ type: 'spring', damping: 12 }}
               >
-                <h2 className="text-3xl font-bold text-gray-300 mb-1" style={{ fontFamily: 'var(--font-primary)' }}>
-                  A Wish for
+                <h2 style={{ fontSize: '1.2rem', color: '#9ca3af', fontWeight: 600, marginBottom: '2px' }}>
+                  Make a Wish,
                 </h2>
-                <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-pink-400 to-purple-400 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]" style={{ fontFamily: 'var(--font-fun)' }}>
+                <h1 style={{ 
+                  fontSize: '2.8rem', 
+                  fontWeight: 800, 
+                  fontFamily: 'var(--font-fun)',
+                  background: 'linear-gradient(135deg, #fbbf24, #ec4899, #c084fc)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.5))',
+                  letterSpacing: '0.5px'
+                }}>
                   {userData.name.toUpperCase()}
                 </h1>
               </motion.div>
@@ -348,10 +359,10 @@ function App() {
             />
 
             {/* Instruction Banner */}
-            <div className="mt-8 text-center max-w-xs">
-              <p className="text-sm text-gray-400 font-medium leading-relaxed">
+            <div style={{ marginTop: '24px', textAlign: 'center', maxWidth: '300px' }}>
+              <p style={{ fontSize: '14px', color: '#9ca3af', fontWeight: 500, lineHeight: '1.5' }}>
                 {isAllBlown ? (
-                  <span className="text-amber-400 font-bold flex items-center justify-center gap-1.5 animate-bounce">
+                  <span style={{ color: '#fbbf24', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                     ✨ Your wish is on its way! ✨
                   </span>
                 ) : micEnabled ? (
@@ -364,26 +375,28 @@ function App() {
 
             {/* Direct action fallbacks */}
             {!isAllBlown && (
-              <div className="mt-6 flex gap-3">
+              <div className="flex-row flex-center mt-6" style={{ gap: '12px' }}>
                 <button
                   onClick={() => setCandleStates(Array(candleCount).fill(false))}
-                  className="glass-btn secondary py-2 px-5 text-xs rounded-xl"
+                  className="glass-btn secondary"
+                  style={{ padding: '8px 18px', fontSize: '11px', borderRadius: '10px' }}
                 >
                   💨 Blow Out All
                 </button>
                 <button
                   onClick={handleReset}
-                  className="glass-btn secondary py-2 px-5 text-xs rounded-xl"
+                  className="glass-btn secondary"
+                  style={{ padding: '8px 18px', fontSize: '11px', borderRadius: '10px' }}
                 >
-                  <RefreshCw size={12} className="mr-1" /> Re-light All
+                  <RefreshCw size={11} style={{ marginRight: '4px' }} /> Re-light
                 </button>
               </div>
             )}
           </main>
 
           {/* Footer branding */}
-          <footer className="py-6 text-center text-xs text-gray-600 z-10 select-none">
-            Click floating balloons to pop them! 🎈
+          <footer style={{ padding: '20px 0', fontSize: '11px', color: '#4b5563', zIndex: 10, userSelect: 'none', textAlign: 'center' }}>
+            Pop the floating balloons for extra fun! 🎈
           </footer>
 
           {/* Celebration Greeting Popup */}
@@ -397,52 +410,51 @@ function App() {
             )}
           </AnimatePresence>
 
-          {/* Customizer Slider Settings Panel (Drawer) */}
+          {/* Settings Drawer Panel */}
           <AnimatePresence>
             {settingsOpen && (
-              <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs">
-                {/* Backdrop closer */}
-                <div className="absolute inset-0" onClick={() => setSettingsOpen(false)} />
+              <div className="settings-overlay">
+                <div className="absolute inset-0" style={{ position: 'absolute', inset: 0 }} onClick={() => setSettingsOpen(false)} />
                 
                 <motion.div
                   initial={{ x: '100%' }}
                   animate={{ x: 0 }}
                   exit={{ x: '100%' }}
                   transition={{ type: 'tween', duration: 0.3 }}
-                  className="relative w-80 h-full bg-[#110e20] border-l border-white/10 p-6 flex flex-col justify-between shadow-2xl z-10"
+                  className="settings-drawer"
                 >
                   <div>
                     {/* Header */}
-                    <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
-                      <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                        <Settings size={18} className="text-amber-400" /> Customize Party
+                    <div className="drawer-header">
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Settings size={18} style={{ color: '#fbbf24' }} /> Customize Cake
                       </h3>
                       <button 
                         onClick={() => setSettingsOpen(false)}
-                        className="p-1 rounded-full text-gray-400 hover:bg-white/5 hover:text-white"
+                        className="btn-close"
                       >
-                        <X size={20} />
+                        <X size={18} />
                       </button>
                     </div>
 
-                    {/* Options list */}
-                    <div className="space-y-6 overflow-y-auto custom-scrollbar pr-1 max-h-[calc(100vh-180px)]">
+                    {/* Options content */}
+                    <div className="drawer-content">
                       {/* Name input */}
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Birthday Name</label>
+                      <div className="form-group">
+                        <label className="form-label">Birthday Star's Name</label>
                         <input
                           type="text"
                           value={userData.name}
                           onChange={(e) => setUserData(prev => ({ ...prev, name: e.target.value }))}
-                          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400"
+                          className="form-input"
                         />
                       </div>
 
                       {/* Candle count slider */}
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Candles</label>
-                          <span className="text-sm font-bold text-amber-400">{candleCount}</span>
+                      <div className="form-group">
+                        <div className="flex-between" style={{ marginBottom: '6px' }}>
+                          <label className="form-label">Candles</label>
+                          <span style={{ fontSize: '14px', fontWeight: 800, color: '#fbbf24' }}>{candleCount}</span>
                         </div>
                         <input
                           type="range"
@@ -450,23 +462,28 @@ function App() {
                           max="10"
                           value={candleCount}
                           onChange={(e) => setCandleCount(parseInt(e.target.value))}
-                          className="w-full accent-amber-400 h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                          className="range-slider"
                         />
                       </div>
 
                       {/* Flavor selector */}
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2.5">Cake Flavor</label>
-                        <div className="grid grid-cols-2 gap-2">
+                      <div className="form-group">
+                        <label className="form-label">Cake Flavor</label>
+                        <div className="grid-2">
                           {['chocolate', 'strawberry', 'vanilla', 'redvelvet'].map((flv) => (
                             <button
                               key={flv}
                               onClick={() => setFlavor(flv)}
-                              className={`py-2 px-3 rounded-xl border text-xs font-semibold capitalize transition ${
-                                flavor === flv 
-                                  ? 'border-amber-400 bg-amber-400/10 text-white' 
-                                  : 'border-white/5 bg-white/5 text-gray-400 hover:bg-white/10'
-                              }`}
+                              className="form-select"
+                              style={{
+                                padding: '10px',
+                                fontSize: '12px',
+                                textAlign: 'center',
+                                border: flavor === flv ? '1px solid #fbbf24' : '1px solid rgba(255, 255, 255, 0.08)',
+                                background: flavor === flv ? 'rgba(251, 191, 36, 0.08)' : '#0d0a1a',
+                                color: flavor === flv ? '#fbbf24' : '#9ca3af',
+                                textTransform: 'capitalize'
+                              }}
                             >
                               {flv === 'redvelvet' ? 'Red Velvet' : flv}
                             </button>
@@ -475,10 +492,10 @@ function App() {
                       </div>
 
                       {/* Microphone toggle */}
-                      <div className="flex items-center justify-between py-2">
+                      <div className="flex-between">
                         <div>
-                          <label className="block text-sm font-semibold text-white">Microphone Mode</label>
-                          <span className="text-[10px] text-gray-500">Enable voice blowing</span>
+                          <label style={{ fontSize: '14px', fontWeight: 600, color: '#fff' }}>Microphone Mode</label>
+                          <span style={{ fontSize: '10px', color: '#6b7280', display: 'block' }}>Voice blow detection</span>
                         </div>
                         <label className="toggle-switch">
                           <input 
@@ -491,10 +508,10 @@ function App() {
                       </div>
 
                       {/* Sprinkles toggle */}
-                      <div className="flex items-center justify-between py-2">
+                      <div className="flex-between">
                         <div>
-                          <label className="block text-sm font-semibold text-white">Sprinkles</label>
-                          <span className="text-[10px] text-gray-500">Enable colorful sprinkles</span>
+                          <label style={{ fontSize: '14px', fontWeight: 600, color: '#fff' }}>Sprinkles</label>
+                          <span style={{ fontSize: '10px', color: '#6b7280', display: 'block' }}>Enable toppings</span>
                         </div>
                         <label className="toggle-switch">
                           <input 
@@ -507,10 +524,10 @@ function App() {
                       </div>
 
                       {/* Cherries toggle */}
-                      <div className="flex items-center justify-between py-2">
+                      <div className="flex-between">
                         <div>
-                          <label className="block text-sm font-semibold text-white">Cherries</label>
-                          <span className="text-[10px] text-gray-500">Enable cake cherry toppings</span>
+                          <label style={{ fontSize: '14px', fontWeight: 600, color: '#fff' }}>Cherries</label>
+                          <span style={{ fontSize: '10px', color: '#6b7280', display: 'block' }}>Add cherries</span>
                         </div>
                         <label className="toggle-switch">
                           <input 
@@ -524,10 +541,10 @@ function App() {
                     </div>
                   </div>
 
-                  {/* Close button at bottom */}
                   <button
                     onClick={() => setSettingsOpen(false)}
-                    className="w-full glass-btn justify-center py-3 rounded-xl mt-4"
+                    className="glass-btn w-full flex-center"
+                    style={{ width: '100%', justifyContent: 'center' }}
                   >
                     Apply Settings
                   </button>
