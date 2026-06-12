@@ -1,0 +1,56 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  avatar    String?
+  plan      Plan     @default(FREE)
+  cakes     Cake[]
+  wishes    Wish[]
+  createdAt DateTime @default(now())
+}
+
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+model Cake {
+  id            String   @id @default(cuid())  // Short shareable identifier
+  ownerId       String
+  owner         User     @relation(fields: [ownerId], references: [id])
+  recipientName String
+  message       String   @db.Text
+  frostingColor String   @default("#F4A0B4")
+  decorations   Json     @default("{}")        // sprinkles, toppings options
+  candleColor   String   @default("#FFD700")
+  isPublic      Boolean  @default(true)
+  wishes        Wish[]
+  viewCount     Int      @default(0)
+  createdAt     DateTime @default(now())
+  expiresAt     DateTime?
+}
+
+model Wish {
+  id          String   @id @default(uuid())
+  cakeId      String
+  cake        Cake     @relation(fields: [cakeId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  guestName   String?
+  message     String   @db.Text
+  candleColor String   @default("#FFD700")
+  emoji       String   @default("🕯️")
+  createdAt   DateTime @default(now())
+}
