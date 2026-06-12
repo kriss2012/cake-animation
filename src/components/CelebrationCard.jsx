@@ -12,57 +12,124 @@ const WISHES = [
 ];
 
 const CelebrationCard = ({ name, age, onReset }) => {
-  // Select a random wish based on name/age so it doesn't change on simple re-renders
   const wish = useMemo(() => {
     const seed = name.length + age;
     return WISHES[seed % WISHES.length];
   }, [name, age]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="celebration-overlay">
       <motion.div
         initial={{ opacity: 0, scale: 0.8, rotateY: -30 }}
         animate={{ opacity: 1, scale: 1, rotateY: 0 }}
         exit={{ opacity: 0, scale: 0.8, rotateY: 30 }}
         transition={{ type: 'spring', damping: 15, stiffness: 100 }}
-        className="glass-panel w-full max-w-md p-8 text-center relative overflow-hidden"
+        className="glass-panel max-w-md w-full p-8 text-center relative overflow-hidden"
       >
-        {/* Magic lights in background */}
-        <div className="absolute -top-10 -left-10 w-24 h-24 bg-pink-500 rounded-full blur-2xl opacity-30 animate-pulse"></div>
-        <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-yellow-500 rounded-full blur-2xl opacity-30 animate-pulse"></div>
+        {/* Magic background glow spots */}
+        <div 
+          className="absolute rounded-full blur-2xl opacity-20 animate-pulse pointer-events-none"
+          style={{
+            top: '-20px',
+            left: '-20px',
+            width: '120px',
+            height: '120px',
+            backgroundColor: '#ec4899'
+          }}
+        />
+        <div 
+          className="absolute rounded-full blur-2xl opacity-20 animate-pulse pointer-events-none"
+          style={{
+            bottom: '-20px',
+            right: '-20px',
+            width: '120px',
+            height: '120px',
+            backgroundColor: '#fbbf24'
+          }}
+        />
 
+        {/* Icon wrapper */}
         <motion.div
           animate={{ scale: [1, 1.1, 1] }}
           transition={{ repeat: Infinity, duration: 2 }}
-          className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-400/10 text-amber-400 mb-6 border border-amber-400/20"
+          className="flex-center"
+          style={{
+            width: '64px',
+            height: '64px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(251, 191, 36, 0.1)',
+            color: '#fbbf24',
+            border: '1px solid rgba(251, 191, 36, 0.2)',
+            margin: '0 auto 24px auto'
+          }}
         >
-          <Gift size={32} />
+          <Gift size={30} />
         </motion.div>
 
-        <h2 className="text-4xl font-extrabold mb-1 tracking-tight text-white" style={{ fontFamily: 'var(--font-primary)' }}>
+        <h2 
+          className="text-center" 
+          style={{ 
+            fontSize: '2rem', 
+            fontWeight: 800, 
+            marginBottom: '4px', 
+            letterSpacing: '-0.5px',
+            color: '#fff'
+          }}
+        >
           Happy Birthday,
         </h2>
-        <h3 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-pink-400 to-purple-400 mb-4" style={{ fontFamily: 'var(--font-cursive)' }}>
+        <h3 
+          className="text-center animate-pulse" 
+          style={{ 
+            fontSize: '3.2rem', 
+            fontWeight: 800, 
+            fontFamily: 'var(--font-cursive)',
+            marginBottom: '16px',
+            background: 'linear-gradient(135deg, #fbbf24, #f472b6, #a78bfa)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            display: 'inline-block'
+          }}
+        >
           {name}! 🎉
         </h3>
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-8 relative">
-          <Sparkles className="absolute top-3 left-3 text-amber-400/30" size={16} />
-          <Sparkles className="absolute bottom-3 right-3 text-pink-400/30" size={16} />
-          <p className="text-gray-200 leading-relaxed font-medium text-sm italic">
+        {/* Wish Quotation Box */}
+        <div 
+          className="relative text-center"
+          style={{
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '16px',
+            padding: '24px 20px',
+            marginBottom: '28px',
+          }}
+        >
+          <Sparkles className="absolute text-amber-400/30" size={14} style={{ top: '12px', left: '12px', color: 'rgba(251, 191, 36, 0.3)' }} />
+          <Sparkles className="absolute text-pink-400/30" size={14} style={{ bottom: '12px', right: '12px', color: 'rgba(236, 72, 153, 0.3)' }} />
+          <p 
+            style={{ 
+              color: '#f3f4f6', 
+              lineHeight: '1.6', 
+              fontWeight: 500, 
+              fontSize: '15px', 
+              fontStyle: 'italic'
+            }}
+          >
             "{wish}"
           </p>
         </div>
 
-        <div className="text-sm text-gray-400 mb-6 font-semibold">
-          🎈 You are officially <span className="text-amber-400 font-bold">{age}</span> years of awesomeness today!
+        <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '24px', fontWeight: 600 }}>
+          🎈 You are officially <span style={{ color: '#fbbf24', fontWeight: 800 }}>{age}</span> years of awesomeness today!
         </div>
 
         <button
           onClick={onReset}
-          className="glass-btn gap-2 w-full justify-center"
+          className="glass-btn flex-center w-full"
+          style={{ display: 'flex', width: '100%', justifyContent: 'center' }}
         >
-          <RotateCcw size={18} /> Make Another Wish
+          <RotateCcw size={16} /> Make Another Wish
         </button>
       </motion.div>
     </div>
