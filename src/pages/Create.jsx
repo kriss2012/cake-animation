@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Sparkles, Check, ChevronRight } from 'lucide-react';
 import CakeScene from '../components/cake/CakeScene';
 import { useCakeStore } from '../store/cakeStore';
