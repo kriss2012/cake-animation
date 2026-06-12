@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "canvas-confetti": "^1.9.4",
     "framer-motion": "^12.18.1",
     "gsap": "^3.13.0",
+    "lucide-react": "^1.18.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
